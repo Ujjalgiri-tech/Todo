@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "work_logs",
+  "info": {
+    "singularName": "work-log",
+    "pluralName": "work-logs",
+    "displayName": "WorkLog"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "student_id": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "check_in": {
+      "type": "datetime"
+    },
+    "check_out": {
+      "type": "datetime"
+    },
+    "assigned_tasks": {
+      "type": "blocks",
+      "required": true
+    },
+    "remarks": {
+      "type": "blocks"
+    },
+    "work_status": {
+      "type": "enumeration",
+      "required": true,
+      "default": "pending",
+      "enum": [
+        "pending",
+        "in_progress",
+        "complete"
+      ]
+    }
+  }
+}
