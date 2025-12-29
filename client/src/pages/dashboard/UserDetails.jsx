@@ -2,53 +2,79 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AssignModal from "../dashboard/AssignModal";
 
-import AssignTaskModal from "../dashboard/AssignTaskModal";
-import ViewDetail from "../dashboard/ViewDetail"; // Import the new modal
+import ViewDetail from "../dashboard/ViewDetail";
 
-import admin from "../../assets/images/admin.jpg";
+import adminImg from "../../assets/images/admin.jpg";
 import thunder from "../../assets/icons/thunder.png";
 import setting from "../../assets/icons/setting.png";
 
-export default function UserDetail() {
+export default function UserDetails() {
   const [users, setUsers] = useState([]);
   const [workLogs, setWorkLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false); // ViewDetail modal state
+  const [showViewModal, setShowViewModal] = useState(false);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  /* ================= FETCH USERS + TASKS ================= */
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
     if (!token) {
+      setError("Unauthorized: No token found");
       setLoading(false);
       return;
     }
-    fetchUsersAndTasks();
+    fetchData();
   }, [token]);
 
-  const fetchUsersAndTasks = async () => {
+  // 🔥 Refresh data automatically when coming back from AssignTask page
+  useEffect(() => {
+    const onFocus = () => fetchData();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
+
+  const fetchData = async () => {
     try {
+      setLoading(true);
       const headers = { Authorization: `Bearer ${token}` };
 
-      const meRes = await axios.get("http://localhost:1337/api/users/me", { headers });
-      const adminId = meRes.data.id;
+      // Get logged-in admin
+      const meRes = await axios.get("http://localhost:1337/api/users/me", {
+        headers,
+      });
 
-      const [userRes, taskRes] = await Promise.all([
-        axios.get("http://localhost:1337/api/users", { headers }),
-        axios.get("http://localhost:1337/api/work-logs", { headers }),
-      ]);
+      // Get all users
+      const usersRes = await axios.get("http://localhost:1337/api/users", {
+        headers,
+      });
 
-      const filteredUsers = (userRes.data || []).filter((u) => u.id !== adminId);
+      // Get work logs
+      let logs = [];
+      try {
+        const logsRes = await axios.get("http://localhost:1337/api/work-logs", {
+          headers,
+        });
+        logs = logsRes.data?.data || [];
+      } catch (e) {
+        console.warn("Work logs fetch failed");
+      }
+
+      // Remove admin from user list
+      const filteredUsers = usersRes.data.filter((u) => u.id !== meRes.data.id);
 
       setUsers(filteredUsers);
-      setWorkLogs(taskRes.data.data || []);
+      setWorkLogs(logs);
+      setError("");
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error("API ERROR:", err);
+      setError("Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -58,14 +84,16 @@ export default function UserDetail() {
   const getActiveTaskCount = (username) =>
     workLogs.filter(
       (log) =>
-        log.name === username &&
-        ["pending", "in_progress", "completed"].includes(log.work_status)
+        log?.name === username &&
+        ["pending", "in_progress", "completed"].includes(
+          log?.work_status?.toLowerCase()
+        )
     ).length;
 
   /* ================= UI ================= */
   return (
-    <div className="flex min-h-screen bg-linear-to-r from-orange-400  to-blue-400">
-      {/* Sidebar */}
+    <div className="flex min-h-screen bg-linear-to-r from-orange-400 to-blue-400">
+      {/* SIDEBAR */}
       <motion.aside
         initial={{ x: -80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -78,81 +106,77 @@ export default function UserDetail() {
             <span className="text-lg font-bold text-blue-600">TeamFlow</span>
           </div>
 
-          <nav className="space-y-4 text-gray-600">
+          <nav className="space-y-4 text-gray-700">
             <p
               onClick={() => navigate("/dashboard")}
-              className="hover:text-blue-500 cursor-pointer"
+              className="cursor-pointer"
             >
               Dashboard
             </p>
             <p className="hover:text-blue-500 cursor-pointer">Tasks</p>
-            <p className="font-medium text-blue-600">Users</p>
+            <p className="hover:text-blue-500 cursor-pointer">Users</p>
             <p className="hover:text-blue-500 cursor-pointer">Reports</p>
           </nav>
         </div>
 
         <div className="flex items-center gap-2">
           <img src={setting} alt="settings" className="w-7 h-7" />
-          <p className="text-gray-500 cursor-pointer">Settings</p>
+          <p className="text-gray-600">Settings</p>
         </div>
       </motion.aside>
 
-      {/* Main */}
+      {/* MAIN */}
       <main className="flex-1 p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-semibold">Users</h1>
-
-          <img
-            src={admin}
-            alt="admin"
-            className="w-10 h-10 rounded-full object-cover"
-          />
+          <img src={adminImg} alt="admin" className="w-10 h-10 rounded-full" />
         </div>
 
-        {/* User Grid */}
         {loading ? (
           <p className="text-center mt-10">Loading users...</p>
+        ) : error ? (
+          <p className="text-center text-red-500 mt-10">{error}</p>
         ) : users.length === 0 ? (
           <p className="text-center text-gray-400 mt-10">
             No registered users found
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {users.map((u) => (
+            {users.map((user) => (
               <div
-                key={u.id}
-                className="bg-linear-to-b from-gray-100 to-gray-200 rounded-xl shadow-sm p-6 text-center"
+                key={user.id}
+                className="bg-gray-100 rounded-xl p-6 text-center"
               >
-                {/* Avatar */}
-                <div className="w-20 h-20 mx-auto rounded-full bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-600">
-                  {u.username?.charAt(0).toUpperCase()}
+                <div className="w-20 h-20 mx-auto rounded-full bg-blue-200 flex items-center justify-center text-2xl font-bold">
+                  {user.username?.charAt(0).toUpperCase()}
                 </div>
 
-                <h3 className="mt-4 font-semibold text-lg">{u.username}</h3>
+                <h3 className="mt-4 font-semibold">{user.username}</h3>
 
-                <p className="text-sm text-gray-500 mt-1">
-                  {getActiveTaskCount(u.username)} Active Tasks
+                <p className="text-xs text-gray-500">{user.email}</p>
+
+                <p className="text-sm mt-2">
+                  {getActiveTaskCount(user.username)} Active Tasks
                 </p>
 
-                {/* Assign Task Button */}
+                {/* ASSIGN TASK */}
                 <button
                   onClick={() => {
-                    setSelectedUser(u);
+                    setSelectedUser(user);
                     setShowAssignModal(true);
                   }}
-                  className="mt-5 w-full bg-gray-100 hover:bg-blue-600 hover:text-white text-sm py-2 rounded-md transition"
+                  className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md"
                 >
                   Assign Task
                 </button>
 
-                {/* View Details Button */}
+                {/* VIEW DETAILS */}
                 <button
                   onClick={() => {
-                    setSelectedUser(u);
+                    setSelectedUser(user);
                     setShowViewModal(true);
                   }}
-                  className="mt-2 w-full bg-gray-200 hover:bg-gray-300 text-sm py-2 rounded-md transition"
+                  className="mt-2 w-full bg-gray-200 py-2 rounded-md"
                 >
                   View Details
                 </button>
@@ -160,21 +184,15 @@ export default function UserDetail() {
             ))}
           </div>
         )}
-
-        <p className="text-center text-xs text-gray-400 mt-10">
-          © 2025 TeamFlow. All rights reserved.
-        </p>
-
-        {/* Assign Task Modal */}
         {showAssignModal && selectedUser && (
-          <AssignTaskModal
+          <AssignModal
             user={selectedUser}
+            token={token}
             onClose={() => setShowAssignModal(false)}
-            onSuccess={fetchUsersAndTasks}
+            onSuccess={fetchData} 
           />
         )}
 
-        {/* View Detail Modal */}
         {showViewModal && selectedUser && (
           <ViewDetail
             user={selectedUser}

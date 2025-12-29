@@ -16,6 +16,7 @@ export default function AssignTask() {
 
   const [loading, setLoading] = useState(false);
 
+  // 🔐 Redirect if not logged in
   if (!token) {
     navigate("/login");
     return null;
@@ -30,38 +31,39 @@ export default function AssignTask() {
     setLoading(true);
 
     try {
-     await axios.post(
-  "http://localhost:1337/api/work-logs",
-  {
-    data: {
-      student_id: form.student_id,
-      name: form.name,
-      check_in: new Date().toISOString(),
-      check_out: null,
-      assigned_tasks: [
+      await axios.post(
+        "http://localhost:1337/api/work-logs",
         {
-          type: "paragraph",
-          children: [{ type: "text", text: form.assigned_tasks }],
+          data: {
+            student_id: form.student_id,
+            name: form.name,
+            check_in: new Date().toISOString(),
+            check_out: null,
+            assigned_tasks: [
+              {
+                type: "paragraph",
+                children: [{ type: "text", text: form.assigned_tasks }],
+              },
+            ],
+            remarks: [
+              {
+                type: "paragraph",
+                children: [{ type: "text", text: form.remarks }],
+              },
+            ],
+            work_status: form.work_status,
+            publishedAt: new Date().toISOString(), // ⭐ required for Strapi
+          },
         },
-      ],
-      remarks: [
         {
-          type: "paragraph",
-          children: [{ type: "text", text: form.remarks }],
-        },
-      ],
-      work_status: form.work_status,
-      publishedAt: new Date().toISOString(), // ⭐ IMPORTANT
-    },
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      navigate("/dashboard");
+      
+      navigate("/users");
     } catch (err) {
       console.error("Assign failed:", err.response?.data || err);
       alert("Failed to assign task");
@@ -73,7 +75,9 @@ export default function AssignTask() {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
       <div className="bg-white w-full max-w-md rounded-lg p-6 shadow">
-        <h2 className="text-xl font-semibold mb-4">Assign New Task</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          Assign New Task
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -127,11 +131,12 @@ export default function AssignTask() {
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/user-details")}
               className="border px-4 py-2 rounded"
             >
               Cancel
             </button>
+
             <button
               disabled={loading}
               className="bg-blue-600 text-white px-4 py-2 rounded"

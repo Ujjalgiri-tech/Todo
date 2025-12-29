@@ -24,13 +24,9 @@ export default function AdminDashboard() {
 
   const fetchWorkLogs = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:1337/api/work-logs",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      const res = await axios.get("http://localhost:1337/api/work-logs", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setWorkLogs(res.data.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -39,22 +35,14 @@ export default function AdminDashboard() {
     }
   };
 
-  /* ================= DELETE (documentId) ================= */
+  /* ================= DELETE ================= */
   const handleDelete = async (documentId) => {
     if (!window.confirm("Are you sure you want to delete this task?")) return;
-
     try {
-      await axios.delete(
-        `http://localhost:1337/api/work-logs/${documentId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      // remove from UI using documentId
-      setWorkLogs((prev) =>
-        prev.filter((item) => item.documentId !== documentId)
-      );
+      await axios.delete(`http://localhost:1337/api/work-logs/${documentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setWorkLogs((prev) => prev.filter((item) => item.documentId !== documentId));
     } catch (err) {
       alert("Delete failed");
       console.error("Delete error:", err.response?.data || err);
@@ -77,31 +65,33 @@ export default function AdminDashboard() {
 
   /* ================= UI ================= */
   return (
-    <>
-    <div className="flex min-h-screen bg-linear-to-r from-orange-400  to-blue-400">
+    <div className="flex min-h-screen bg-linear-to-r from-orange-400 to-blue-400">
       {/* Sidebar */}
       <motion.aside
         initial={{ x: -80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.35 }}
-        className="w-64 bg-linear-to-b from-green-300 via-green-400 to-green-500  px-6 py-5 flex flex-col justify-between"
+        className="w-64 bg-linear-to-b from-green-300 via-green-400 to-green-500 px-6 py-5 flex flex-col justify-between"
       >
         <div>
-          <div className="flex items-center gap-2 mb-8 ">
-            <img src={thunder} alt="logo" className="w-8 h-8 rounded-md " />
-            <span className="text-lg font-bold text-emerald-600 rounded-2xl">TeamFlow</span>
+          <div className="flex items-center gap-2 mb-8">
+            <img src={thunder} alt="logo" className="w-8 h-8 rounded-md" />
+            <span className="text-lg font-bold text-emerald-600 rounded-2xl">
+              TeamFlow
+            </span>
           </div>
-
           <nav className="space-y-4 text-gray-600">
             <p className="font-medium text-emerald-600">Dashboard</p>
             <p className="hover:text-blue-500 cursor-pointer">Tasks</p>
-            <p className="hover:text-blue-500 cursor-pointer"
-            onClick={() => navigate("/users")}
-            >Users</p>
+            <p
+              className="hover:text-blue-500 cursor-pointer"
+              onClick={() => navigate("/users")}
+            >
+              Users
+            </p>
             <p className="hover:text-blue-500 cursor-pointer">Reports</p>
           </nav>
         </div>
-
         <div className="flex items-center gap-2">
           <img src={setting} alt="settings" className="w-7 h-7" />
           <p className="text-gray-500 cursor-pointer">Settings</p>
@@ -113,20 +103,14 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/assign-task")}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm mr-4"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
             >
-              +Add User
+              + Add User
             </button>
-
-            <img
-              src={admin}
-              alt="admin"
-              className="w-10 h-10 rounded-full object-cover"
-            />
+            <img src={admin} alt="admin" className="w-10 h-10 rounded-full object-cover" />
           </div>
         </div>
 
@@ -139,7 +123,6 @@ export default function AdminDashboard() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-
           <select
             className="border px-3 py-2 rounded-md text-sm w-full sm:w-auto"
             value={statusFilter}
@@ -147,24 +130,23 @@ export default function AdminDashboard() {
           >
             <option value="">All Status</option>
             <option value="pending">Pending</option>
-            <option value="pending">in_progress</option>
+            <option value="in_progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
         </div>
 
         {/* Table */}
         <div className="bg-white rounded-lg shadow-sm overflow-x-auto flex-1">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-auto border-collapse">
             <thead className="bg-gray-50 text-gray-600">
               <tr>
-                <th className="p-3">Student ID</th>
-                <th>Name</th>
-                <th>Assigned Task</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th className="p-3 border-b text-left">Student ID</th>
+                <th className="p-3 border-b text-left">Name</th>
+                <th className="p-3 border-b text-left">Assigned Task</th>
+                <th className="p-3 border-b text-left">Status</th>
+                <th className="p-3 border-b text-left">Actions</th>
               </tr>
             </thead>
-
             <tbody>
               {loading ? (
                 <tr>
@@ -180,24 +162,26 @@ export default function AdminDashboard() {
                 </tr>
               ) : (
                 filteredLogs.map((d) => (
-                  <tr key={d.id} className="border-t hover:bg-gray-50">
-                    <td className="p-3">{d.student_id || "—"}</td>
-                    <td>{d.name || "—"}</td>
-                    <td className="max-w-xs truncate">
+                  <tr key={d.id} className="hover:bg-gray-50">
+                    <td className="p-3 border-b">{d.student_id || "—"}</td>
+                    <td className="p-3 border-b">{d.name || "—"}</td>
+                    <td className="p-3 border-b max-w-xs truncate">
                       {extractText(d.assigned_tasks) || "—"}
                     </td>
-                    <td>
+                    <td className="p-3 border-b">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${
                           d.work_status === "completed"
                             ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
+                            : d.work_status === "in_progress"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-gray-100 text-gray-700"
                         }`}
                       >
                         {d.work_status}
                       </span>
                     </td>
-                    <td className="flex gap-2 py-2">
+                    <td className="p-3 border-b flex gap-2">
                       <button
                         onClick={() => navigate(`/edit-task/${d.documentId}`)}
                         className="border px-2 py-1 rounded text-xs"
@@ -223,6 +207,5 @@ export default function AdminDashboard() {
         </p>
       </main>
     </div>
-    </>
   );
 }
