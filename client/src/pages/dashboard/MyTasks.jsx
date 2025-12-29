@@ -12,33 +12,30 @@ export default function MyTasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch tasks assigned to the logged-in user
   const fetchMyTasks = async () => {
-    // Must be logged in
-    if (!user || !user.id) {
-      console.log("User not logged in or no ID");
+    if (!user) {
+      console.log("User not logged in");
       setLoading(false);
       return;
     }
-
-    const userId = user.id.toString(); // Strapi user ID → e.g., "9"
-    console.log("Fetching tasks for Strapi User ID:", userId);
 
     setLoading(true);
 
     try {
       const res = await axios.get("http://localhost:1337/api/work-logs", {
-        params: {
-          populate: "*",
-          "filters[student_id][$eq]": userId, // ← This matches the text field
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      const fetchedTasks = res.data.data || [];
-      console.log("Tasks found:", fetchedTasks);
-      setTasks(fetchedTasks);
+      const allTasks = res.data.data || [];
+
+      // Filter tasks for the current user by email or student_id
+      const myTasks = allTasks.filter((task) => {
+        const t = task; // task data is directly here
+        return t.student_id === user.id?.toString() || t.assigned_to_email === user.email;
+      });
+
+      setTasks(myTasks);
     } catch (err) {
       console.error("Error fetching tasks:", err.response?.data || err.message);
       setTasks([]);
@@ -63,14 +60,13 @@ export default function MyTasks() {
           },
         }
       );
-      fetchMyTasks(); // Refresh list
+      fetchMyTasks(); // Refresh after update
     } catch (err) {
       console.error("Update failed:", err.response?.data || err.message);
       alert("Failed to save. Try again.");
     }
   };
 
-  // Extract text from Strapi rich text blocks
   const getRichText = (blocks) => {
     if (!blocks || !Array.isArray(blocks)) return "";
     return blocks
@@ -88,13 +84,15 @@ export default function MyTasks() {
       transition={{ duration: 0.3 }}
       className="min-h-screen bg-gray-100"
     >
-      <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
+      <header className="bg-white px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <img src={thunder} className="w-8 h-8 rounded-md" alt="logo" />
-          <span className="font-semibold text-blue-600 text-lg">TeamFlow</span>
+          <span className="font-semibold text-emerald-600 text-lg">TeamFlow</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600">Welcome, {user?.username || "User"}</span>
+          <span className="text-sm text-gray-600">
+            Welcome, {user?.username || "User"}
+          </span>
           <img src={profile1} className="w-9 h-9 rounded-full object-cover" alt="profile" />
         </div>
       </header>
@@ -126,13 +124,12 @@ export default function MyTasks() {
                 ) : tasks.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center py-12 text-gray-400">
-                      No tasks assigned yet. Ask admin to assign tasks with your ID:{" "}
-                      <strong>{user?.id}</strong>
+                      No tasks assigned yet.
                     </td>
                   </tr>
                 ) : (
                   tasks.map((task) => {
-                    const t = task.attributes;
+                    const t = task; // directly use task without attributes
 
                     return (
                       <tr key={task.id} className="hover:bg-gray-50">

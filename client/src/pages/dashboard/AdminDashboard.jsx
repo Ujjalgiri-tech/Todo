@@ -42,7 +42,9 @@ export default function AdminDashboard() {
       await axios.delete(`http://localhost:1337/api/work-logs/${documentId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setWorkLogs((prev) => prev.filter((item) => item.documentId !== documentId));
+      setWorkLogs((prev) =>
+        prev.filter((item) => item.documentId !== documentId)
+      );
     } catch (err) {
       alert("Delete failed");
       console.error("Delete error:", err.response?.data || err);
@@ -51,12 +53,12 @@ export default function AdminDashboard() {
 
   /* ================= HELPERS ================= */
   const extractText = (blocks = []) =>
-    blocks
-      .map((b) => b.children?.map((c) => c.text).join("") || "")
-      .join(" ");
+    blocks.map((b) => b.children?.map((c) => c.text).join("") || "").join(" ");
 
   const filteredLogs = workLogs.filter((d) => {
-    const text = `${d.name || ""} ${extractText(d.assigned_tasks)}`.toLowerCase();
+    const text = `${d.name || ""} ${extractText(
+      d.assigned_tasks
+    )}`.toLowerCase();
     return (
       text.includes(search.toLowerCase()) &&
       (!statusFilter || d.work_status === statusFilter)
@@ -74,7 +76,10 @@ export default function AdminDashboard() {
         className="w-64 bg-linear-to-b from-green-300 via-green-400 to-green-500 px-6 py-5 flex flex-col justify-between"
       >
         <div>
-          <div className="flex items-center gap-2 mb-8">
+          <div
+            className="flex items-center gap-2 mb-8 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
             <img src={thunder} alt="logo" className="w-8 h-8 rounded-md" />
             <span className="text-lg font-bold text-emerald-600 rounded-2xl">
               TeamFlow
@@ -110,7 +115,11 @@ export default function AdminDashboard() {
             >
               + Add User
             </button>
-            <img src={admin} alt="admin" className="w-10 h-10 rounded-full object-cover" />
+            <img
+              src={admin}
+              alt="admin"
+              className="w-10 h-10 rounded-full object-cover"
+            />
           </div>
         </div>
 

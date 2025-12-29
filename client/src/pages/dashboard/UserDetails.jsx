@@ -101,9 +101,11 @@ export default function UserDetails() {
         className="w-64 bg-linear-to-b from-green-300 via-green-400 to-green-500 px-6 py-5 flex flex-col justify-between rounded-md"
       >
         <div>
-          <div className="flex items-center gap-2 mb-8">
-            <img src={thunder} alt="logo" className="w-8 h-8" />
-            <span className="text-lg font-bold text-blue-600">TeamFlow</span>
+          <div className="flex items-center gap-2 mb-8 cursor-pointer" 
+          onClick={() => navigate("/")}
+          >
+            <img src={thunder} alt="logo" className="w-8 h-8 rounded-md" />
+            <span className="text-lg font-bold text-emerald-600">TeamFlow</span>
           </div>
 
           <nav className="space-y-4 text-gray-700">

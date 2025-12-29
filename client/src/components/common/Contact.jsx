@@ -183,14 +183,14 @@ export default function Contact() {
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <iframe
                 title="TeamFlow Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d28293.81571718674!2d85.28440217415575!3d27.715235498212574!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19048e2760fb%3A0x7e52c2907dfec554!2sKathmandu%2C%20Nepal!5e0!3m2!1sen!2snp!4v170XXXYYYYZZZZ"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d28293.81571718674!2d85.28440217415575!3d27.715235498212574!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19048e2760fb%3A0x7e52c2907dfec554!2sKathmandu%2C%20Nepal!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen=""
                 loading="eager"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="w-full h-56 object-cover"
+                className="w-full h-full object-cover"
               ></iframe>
               <button className="w-full bg-blue-500 text-white py-3 font-semibold">
                 Schedule a Demo
