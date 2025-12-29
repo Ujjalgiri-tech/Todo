@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import signup from "../../assets/images/signup.jpg";
+
 
 
 export default function HowItWorks() {
@@ -46,7 +48,7 @@ export default function HowItWorks() {
             className="bg-white rounded-xl shadow-md p-6 flex items-center justify-center"
           >
             <div className="h-64 w-full bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-              Hero Illustration
+              <img src={signup}/>
             </div>
           </motion.div>
         </div>

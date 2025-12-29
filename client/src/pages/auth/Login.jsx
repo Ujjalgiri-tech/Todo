@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext.jsx";
-import ParticlesBackground from "../../components/common/Particles.jsx";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -69,7 +68,7 @@ export default function Login() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="w-full max-w-md bg-emerald-400 rounded-xl shadow-lg px-8 py-10"
+        className="w-full max-w-md bg-linear-to-b from-emerald-300 to-emerald-400 rounded-xl shadow-lg px-8 py-10"
       >
         <div className="flex flex-col items-center mb-6">
           <div className="w-10 h-10 rounded-lg bg-emerald-900 flex items-center justify-center text-white font-bold">
@@ -134,7 +133,6 @@ export default function Login() {
         </form>
       </motion.div>
     </div>
-    <ParticlesBackground/>
     </>
   );
 }
